@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: seen-it-postgres
+    environment:
+      POSTGRES_DB: seen_it
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres1
+    ports:
+      - "5432:5432"
