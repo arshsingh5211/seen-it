@@ -15,3 +15,8 @@ spring:
 logging:
   level:
     org.springframework.jdbc.core: DEBUG
+
+app:
+  service:
+    base-url: http://www.omdbapi.com/
+    api-key: REMOVED_OMDB_API_KEY # todo: base64 encrypt api key later
