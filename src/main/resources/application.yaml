@@ -3,10 +3,11 @@ spring:
     name: seen-it
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/media_tracker
+    url: jdbc:postgresql://localhost:5432/seenit
     username: postgres
     password: postgres1
     driver-class-name: org.postgresql.Driver
+
 
   sql:
     init:

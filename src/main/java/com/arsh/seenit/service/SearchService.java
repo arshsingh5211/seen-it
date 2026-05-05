@@ -12,10 +12,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OmdbService {
+public class SearchService {
 
     private final ServiceProperties serviceProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     public List<SearchDto> search(String query) {
 
@@ -40,6 +40,7 @@ public class OmdbService {
                 ));
             }
         }
+        // todo: handle an empty response here somehow
 
         return results;
     }
