@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 @Data
 public class WatchedItem {
     @Id
-    private int id;
+    private int watchedItemId;
     private String imdbID;
     private String title;
-    private String year;
-    private String type;
-    private String poster;
+    private String releaseYear;
+    private String mediaType;
+    private String posterUrl;
     private Integer rating;
     private String review;
     private LocalDateTime createdAt;

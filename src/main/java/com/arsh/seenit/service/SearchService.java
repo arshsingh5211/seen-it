@@ -15,7 +15,6 @@ import java.util.List;
 public class SearchService {
 
     private final ServiceProperties serviceProperties;
-    private final RestTemplate restTemplate;
 
     public List<SearchDto> search(String query) {
 
@@ -25,6 +24,7 @@ public class SearchService {
                 .queryParam("apikey", serviceProperties.apiKey())
                 .toUriString();
 
+        RestTemplate restTemplate = new RestTemplate();
         JsonNode response = restTemplate.getForObject(url, JsonNode.class);
 
         List<SearchDto> results = new ArrayList<>();
