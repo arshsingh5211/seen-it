@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class WatchedItem {
     @Id
     private int watchedItemId;
-    private String imdbID;
+    private String imdbId;
     private String title;
     private String releaseYear;
     private String mediaType;

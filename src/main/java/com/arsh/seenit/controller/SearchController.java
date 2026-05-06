@@ -1,5 +1,6 @@
 package com.arsh.seenit.controller;
 
+import com.arsh.seenit.dto.SearchDetailsDto;
 import com.arsh.seenit.dto.SearchDto;
 import com.arsh.seenit.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -17,5 +18,10 @@ public class SearchController {
     @GetMapping("/search")
     public List<SearchDto> search(@RequestParam String query) {
         return searchService.search(query);
+    }
+
+    @GetMapping("/details")
+    public SearchDetailsDto getDetails(@RequestParam String id) {
+        return searchService.getDetails(id);
     }
 }
