@@ -3,7 +3,7 @@ services:
     image: postgres:latest
     container_name: seen-it-postgres
     environment:
-      POSTGRES_DB: seen_it
+      POSTGRES_DB: seenit
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres1
     ports:

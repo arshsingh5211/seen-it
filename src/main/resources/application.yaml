@@ -1,3 +1,23 @@
 spring:
   application:
-    name: seenit
+    name: seen-it
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/seenit
+    username: postgres
+    password: postgres1
+    driver-class-name: org.postgresql.Driver
+
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG
+
+app:
+  service:
+    base-url: http://www.omdbapi.com/
+    api-key: REMOVED_OMDB_API_KEY # todo: base64 encrypt api key later
