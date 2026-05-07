@@ -1,6 +1,8 @@
 package com.arsh.seenit.controller;
 
+import com.arsh.seenit.dto.SearchDetailsDto;
 import com.arsh.seenit.model.WatchedItem;
+import com.arsh.seenit.service.SearchService;
 import com.arsh.seenit.service.WatchedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class WatchedController {
     private final WatchedService watchedService;
+    private final SearchService searchService;
 
     @GetMapping
     public Iterable<WatchedItem> findAll() {
@@ -18,8 +21,9 @@ public class WatchedController {
     }
 
     @PostMapping
-    public ResponseEntity<WatchedItem> save(@RequestBody WatchedItem item) {
-        WatchedItem saved = watchedService.save(item);
-        return ResponseEntity.status(201).body(saved);
+    public ResponseEntity<SearchDetailsDto> save(@RequestParam String imdbId) {
+        WatchedItem watchedItem = watchedService.getWatchedItem(imdbId);
+        watchedService.save(watchedItem);
+        return ResponseEntity.status(201).body(searchService.getDetails(watchedItem.getImdbID()));
     }
 }

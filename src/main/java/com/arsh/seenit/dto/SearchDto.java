@@ -1,7 +1,7 @@
 package com.arsh.seenit.dto;
 
 public record SearchDto(
-        String imdbId,
+        String imdbID,
         String title,
         String year,
         String type,
