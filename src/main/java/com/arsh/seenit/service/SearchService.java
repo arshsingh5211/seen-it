@@ -66,7 +66,7 @@ public class SearchService {
                 ));
             }
 
-            SearchDetailsDto results = new SearchDetailsDto(
+            return new SearchDetailsDto(
                     response.get("Title").asString(),
                     response.get("Year").asString(),
                     response.get("Rated").asString(),
@@ -90,7 +90,6 @@ public class SearchService {
                     response.get("BoxOffice").asString(),
                     response.get("Response").asString()
             );
-            return results;
         }
         throw new RuntimeException("Movie not found");
     }
