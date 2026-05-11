@@ -12,6 +12,7 @@ public class WatchedItem {
     private Integer rating;
     private String review;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime watchedAt;
     private LocalDateTime reviewedAt;
 }

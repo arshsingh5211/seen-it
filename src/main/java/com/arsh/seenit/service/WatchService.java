@@ -9,10 +9,12 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.JsonNode;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,14 +25,49 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class WatchService {
     private static final Logger log = LoggerFactory.getLogger(WatchService.class);
+    private final RestTemplate restTemplate;
     private final ServiceProperties serviceProperties;
     private final ContentMetadataRepository contentMetadataRepository;
     private final WatchedItemRepository watchedItemRepository;
 
     public WatchedItem addToWatchlist(String imdbId) {
-        JsonNode response = fetchOmdbDetails(imdbId);
-        saveContent(response);
+        getOrSaveContent(imdbId);
         return saveWatched(imdbId);
+    }
+
+    private ContentMetadata getOrSaveContent(String imdbId) {
+        return contentMetadataRepository.findById(imdbId)
+                .orElseGet(() -> {
+                    JsonNode response = fetchOmdbDetails(imdbId);
+                    return saveContent(response);
+                });
+    }
+
+    private ContentMetadata saveContent(JsonNode response) {
+        ContentMetadata metadata = new ContentMetadata();
+
+        metadata.setImdbId(response.path("imdbID").asString());
+        metadata.setTitle(response.path("Title").asString());
+        metadata.setYear(response.path("Year").asString());
+        metadata.setRated(response.path("Rated").asString());
+        metadata.setReleased(response.path("Released").asString());
+        metadata.setRuntime(response.path("Runtime").asString());
+        metadata.setGenre(response.path("Genre").asString());
+        metadata.setDirector(response.path("Director").asString());
+        metadata.setActors(response.path("Actors").asString());
+        metadata.setPlot(response.path("Plot").asString());
+        metadata.setLanguage(response.path("Language").asString());
+        metadata.setType(response.path("Type").asString());
+        metadata.setPosterUrl(response.path("Poster").asString());
+        metadata.setImdbRating(response.path("imdbRating").asString());
+        metadata.setMetascore(response.path("Metascore").asString());
+
+        ContentMetadata saved = contentMetadataRepository.save(metadata);
+        // TODO: Consider adding Redis later as a short-term cache in front of OMDb/API lookups.
+        // For now, content_metadata in Postgres acts as the persistent metadata cache.
+        log.info("Saved metadata for imdbId={} title={}", saved.getImdbId(), saved.getTitle());
+
+        return saved;
     }
 
     private JsonNode fetchOmdbDetails(String imdbId) {
@@ -40,46 +77,45 @@ public class WatchService {
                 .queryParam("apikey", serviceProperties.apiKey())
                 .toUriString();
 
-        RestTemplate restTemplate = new RestTemplate();
         JsonNode response = restTemplate.getForObject(uri, JsonNode.class);
 
-        if (response == null || "False".equals(response.get("Response").asString())) {
+        if (response == null || "False".equals(response.path("Response").asString())) {
             throw new RuntimeException("OMDb content not found for imdbId: " + imdbId);
         }
         return response;
     }
 
-    private ContentMetadata saveContent(JsonNode response) {
-        ContentMetadata metadata = new ContentMetadata();
+    public WatchedItem rateAndReviewContent(Integer watchedItemId, Integer rating, String review) {
 
-        metadata.setImdbId(response.get("imdbID").asString());
-        metadata.setTitle(response.get("Title").asString());
-        metadata.setYear(response.get("Year").asString());
-        metadata.setRated(response.get("Rated").asString());
-        metadata.setReleased(response.get("Released").asString());
-        metadata.setRuntime(response.get("Runtime").asString());
-        metadata.setGenre(response.get("Genre").asString());
-        metadata.setDirector(response.get("Director").asString());
-        metadata.setActors(response.get("Actors").asString());
-        metadata.setPlot(response.get("Plot").asString());
-        metadata.setLanguage(response.get("Language").asString());
-        metadata.setType(response.get("Type").asString());
-        metadata.setPosterUrl(response.get("Poster").asString());
-        metadata.setImdbRating(response.get("imdbRating").asString());
-        metadata.setMetascore(response.get("Metascore").asString());
+        if (rating != null && (rating < 1 || rating > 5)) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
 
-        ContentMetadata saved = contentMetadataRepository.save(metadata);
-        log.info("Saved metadata for imdbId={} title={}", saved.getImdbId(), saved.getTitle());
-        return saved;
+        WatchedItem item = watchedItemRepository.findById(watchedItemId)
+                .orElseThrow(() -> new RuntimeException("Watched item not found"));
+
+        item.setRating(rating);
+        item.setReview(review);
+        item.setReviewedAt(LocalDateTime.now());
+        item.setUpdatedAt(LocalDateTime.now());
+
+        return watchedItemRepository.save(item);
     }
 
     private WatchedItem saveWatched(String imdbId) {
-        WatchedItem watchedItem = new WatchedItem();
-        watchedItem.setImdbId(imdbId);
-        return watchedItemRepository.save(watchedItem);
+        return watchedItemRepository.findByImdbId(imdbId)
+                .orElseGet(() -> {
+                    WatchedItem watchedItem = new WatchedItem();
+                    watchedItem.setImdbId(imdbId);
+
+                    WatchedItem saved = watchedItemRepository.save(watchedItem);
+                    log.info("Saved watched item for imdbId={}", saved.getImdbId());
+
+                    return saved;
+                });
     }
 
-
+    @Transactional
     public List<WatchlistItemDto> getWatchList() {
         List<WatchedItem> watchedItems = StreamSupport
                 .stream(watchedItemRepository.findAll().spliterator(), false)
@@ -100,7 +136,7 @@ public class WatchService {
             ContentMetadata metadata = metadataByImdbId.get(item.getImdbId());
 
             if (metadata == null) {
-                throw new RuntimeException("Missing metadata for imdbId: " + item.getImdbId());
+                metadata = getOrSaveContent(item.getImdbId());
             }
             // TODO: if metadata is missing:
             // 1. call OMDb API using imdbId
@@ -133,3 +169,14 @@ public class WatchService {
         return watchList;
     }
 }
+
+// TODO: Add user support so watchlists are scoped by userId instead of globally by imdbId.
+// TODO: Add pagination for GET /watchlist before the list gets large.
+// TODO: Add filtering/sorting for watchlist by rating, type, genre, watchedAt, reviewedAt.
+// TODO: Add proper exception classes instead of RuntimeException.
+// TODO: Add controller-level error handling with @ControllerAdvice.
+// TODO: Add metadata refresh strategy for stale content_metadata records.
+// TODO: Consider upsert behavior for content_metadata instead of plain save.
+// TODO: Add tests for addToWatchlist, rateAndReviewContent, and getWatchList.
+// TODO: Add validation DTOs so controllers do not accept raw entity models directly.
+// TODO: Consider Redis later as short-term cache in front of OMDb if traffic/API limits justify it.
