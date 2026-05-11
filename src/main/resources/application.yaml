@@ -20,4 +20,4 @@ logging:
 app:
   service:
     base-url: http://www.omdbapi.com/
-    api-key: REMOVED_OMDB_API_KEY # todo: base64 encrypt api key later
+    api-key: ${OMDB_API_KEY} # todo: base64 encrypt api key later
