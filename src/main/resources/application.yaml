@@ -15,9 +15,9 @@ spring:
 
 logging:
   level:
-    org.springframework.jdbc.core: DEBUG
+    org.springframework.jdbc.core: ERROR
 
 app:
   service:
     base-url: http://www.omdbapi.com/
-    api-key: ${OMDB_API_KEY} # todo: base64 encrypt api key later
+    api-key: ${OMDB_API_KEY}

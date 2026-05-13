@@ -3,6 +3,8 @@ package com.arsh.seenit.service;
 import com.arsh.seenit.dto.SearchDetailsDto;
 import com.arsh.seenit.dto.SearchDto;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -14,7 +16,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
-
+    private static final Logger log = LoggerFactory.getLogger(SearchService.class);
     private final ServiceProperties serviceProperties;
     private final RestTemplate restTemplate;
 
@@ -55,41 +57,44 @@ public class SearchService {
 
         JsonNode response = restTemplate.getForObject(uri, JsonNode.class);
 
-        if (response != null && "True".equals(response.get("Response").asString())) {
-            List<SearchDetailsDto.Rating> ratings = new ArrayList<>();
+        if (response == null || !"True".equals(response.path("Response").asString())) {
+            throw new RuntimeException("Invalid OMDb response for id: " + id);
+        }
 
+        List<SearchDetailsDto.Rating> ratings = new ArrayList<>();
+
+        if (response.has("Ratings")) {
             for (JsonNode r : response.get("Ratings")) {
                 ratings.add(new SearchDetailsDto.Rating(
-                        r.get("Source").asString(),
-                        r.get("Value").asString()
+                        r.path("Source").asString(),
+                        r.path("Value").asString()
                 ));
             }
-
-            return new SearchDetailsDto(
-                    response.get("Title").asString(),
-                    response.get("Year").asString(),
-                    response.get("Rated").asString(),
-                    response.get("Released").asString(),
-                    response.get("Runtime").asString(),
-                    response.get("Genre").asString(),
-                    response.get("Director").asString(),
-                    response.get("Writer").asString(),
-                    response.get("Actors").asString(),
-                    response.get("Plot").asString(),
-                    response.get("Language").asString(),
-                    response.get("Country").asString(),
-                    response.get("Awards").asString(),
-                    response.get("Poster").asString(),
-                    ratings,
-                    response.get("Metascore").asString(),
-                    response.get("imdbRating").asString(),
-                    response.get("imdbVotes").asString(),
-                    response.get("imdbID").asString(),
-                    response.get("Type").asString(),
-                    response.get("BoxOffice").asString(),
-                    response.get("Response").asString()
-            );
         }
-        throw new RuntimeException("Movie not found");
+
+        return new SearchDetailsDto(
+                response.path("Title").asString(),
+                response.path("Year").asString(),
+                response.path("Rated").asString(),
+                response.path("Released").asString(),
+                response.path("Runtime").asString(),
+                response.path("Genre").asString(),
+                response.path("Director").asString(),
+                response.path("Writer").asString(),
+                response.path("Actors").asString(),
+                response.path("Plot").asString(),
+                response.path("Language").asString(),
+                response.path("Country").asString(),
+                response.path("Awards").asString(),
+                response.path("Poster").asString(),
+                ratings,
+                response.path("Metascore").asString(),
+                response.path("imdbRating").asString(),
+                response.path("imdbVotes").asString(),
+                response.path("imdbID").asString(),
+                response.path("Type").asString(),
+                response.path("BoxOffice").asString(),
+                response.path("Response").asString()
+        );
     }
 }

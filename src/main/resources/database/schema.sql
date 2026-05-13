@@ -23,6 +23,7 @@ CREATE TABLE watched_item (
                               watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              reviewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
                               CONSTRAINT unique_watched_item_imdb_id UNIQUE (imdb_id)
 );

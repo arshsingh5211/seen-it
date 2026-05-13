@@ -2,7 +2,7 @@ package com.arsh.seenit.dto;
 
 import java.time.LocalDateTime;
 
-public record WatchlistItemDto(
+public record WatchListItemDto(
         Integer watchedItemId,
         String imdbId,
         String title,

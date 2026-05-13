@@ -23,7 +23,7 @@ public class ContentMetadata {
     private String actors;
     private String plot;
     private String language;
-    private String type;
+    private String mediaType;
     private String posterUrl;
     private String imdbRating;
     private String metascore;
