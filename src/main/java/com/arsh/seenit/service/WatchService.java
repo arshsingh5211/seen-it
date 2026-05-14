@@ -65,11 +65,17 @@ public class WatchService {
         metadata.setImdbRating(response.path("imdbRating").asString());
         metadata.setMetascore(response.path("Metascore").asString());
 
-        ContentMetadata saved = contentMetadataRepository.save(metadata);
+        ContentMetadata saved = contentMetadataRepository.upsert(metadata);
+
+        log.info("Saved object imdbId={}", saved.getImdbId());
+
+        Optional<ContentMetadata> fetched =
+                contentMetadataRepository.findById(saved.getImdbId());
+
+        log.info("Found immediately after save? {}", fetched.isPresent());
         // TODO: Consider adding Redis later as a short-term cache in front of OMDb/API lookups.
         // For now, content_metadata in Postgres acts as the persistent metadata cache.
         log.info("Saved metadata for imdbId={} title={}", saved.getImdbId(), saved.getTitle());
-
         return saved;
     }
 

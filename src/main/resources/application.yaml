@@ -15,7 +15,8 @@ spring:
 
 logging:
   level:
-    org.springframework.jdbc.core: ERROR
+    org.springframework.jdbc.core: DEBUG
+    org.springframework.data.jdbc.core: DEBUG
 
 app:
   service:
