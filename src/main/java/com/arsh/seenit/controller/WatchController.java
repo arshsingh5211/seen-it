@@ -1,9 +1,8 @@
 package com.arsh.seenit.controller;
 
 import com.arsh.seenit.dto.ReviewRequest;
+import com.arsh.seenit.dto.ReviewResponse;
 import com.arsh.seenit.dto.WatchListItemDto;
-import com.arsh.seenit.model.ContentMetadata;
-import com.arsh.seenit.model.WatchedItem;
 import com.arsh.seenit.service.WatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,7 @@ public class WatchController {
     }
 
     @PostMapping("/watched/{imdbId}")
-    public WatchedItem addToWatchList(@PathVariable String imdbId) {
+    public WatchListItemDto addToWatchList(@PathVariable String imdbId) {
         return watchService.addToWatchList(imdbId);
     }
 
@@ -31,7 +30,7 @@ public class WatchController {
     }
 
     @PostMapping("/watched/{watchedItemId}/review")
-    public WatchedItem reviewWatched(
+    public ReviewResponse reviewWatched(
             @PathVariable Integer watchedItemId,
             @RequestBody ReviewRequest request
     ) {

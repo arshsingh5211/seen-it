@@ -15,8 +15,8 @@ spring:
 
 logging:
   level:
-    org.springframework.jdbc.core: DEBUG
-    org.springframework.data.jdbc.core: DEBUG
+    org.springframework.jdbc.core: INFO
+    org.springframework.data.jdbc.core: INFO
 
 app:
   service:

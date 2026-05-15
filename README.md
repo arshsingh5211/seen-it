@@ -112,7 +112,6 @@ Represents user-specific data.
 - Implement metadata refresh or expiration strategy
 - Add integration and unit tests
 - Introduce Redis as an optional short-term cache if needed
-- Add validation layer using DTOs instead of exposing entity models directly
 
 ### Running the Application
 1. Start PostgreSQL locally or via Docker
